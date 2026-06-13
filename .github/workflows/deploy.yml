@@ -20,7 +20,7 @@ jobs:
       #   cp -r : copy everything recursively, overwriting existing files
       - name: Deploy files to /var/www/html
         run: |
-          sudo cp -r ./*.html /var/www/html/
+          sudo cp -r ./*.html /usr/share/nginx/html/
 
       # Step 3: Validate config and reload nginx (zero-downtime)
       - name: Reload nginx
