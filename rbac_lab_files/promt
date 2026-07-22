@@ -1,0 +1,478 @@
+You are a Senior Kubernetes Platform Engineer, DevOps Architect, Security Engineer, and Technical Trainer with 15+ years of experience.
+
+Your task is to create a COMPLETE Kubernetes RBAC Training Repository for students preparing for DevOps interviews in 2026.
+
+DO NOT generate explanations only.
+
+Create the ACTUAL repository with all folders, YAML files, shell scripts, markdown documents, diagrams (Mermaid), interview questions, troubleshooting guides, and labs.
+
+Everything should be production-quality.
+
+=====================================================
+Repository Name
+=====================================================
+
+kubernetes-rbac-complete-training
+
+=====================================================
+Folder Structure
+=====================================================
+
+kubernetes-rbac-complete-training/
+
+README.md
+
+01-Introduction/
+
+02-Kubernetes-Authentication/
+
+03-RBAC-Basics/
+
+04-Roles/
+
+05-RoleBindings/
+
+06-ClusterRoles/
+
+07-ClusterRoleBindings/
+
+08-ServiceAccounts/
+
+09-Builtin-Roles/
+
+10-Groups/
+
+11-Namespace-Isolation/
+
+12-Production-Scenarios/
+
+13-EKS-RBAC/
+
+14-AKS-RBAC/
+
+15-GKE-RBAC/
+
+16-OpenShift/
+
+17-CI-CD/
+
+18-Jenkins/
+
+19-GitHub-Actions/
+
+20-ArgoCD/
+
+21-Helm/
+
+22-Monitoring/
+
+23-Logging/
+
+24-Secrets/
+
+25-Troubleshooting/
+
+26-Interview-Questions/
+
+27-Lab-Challenges/
+
+28-Solutions/
+
+scripts/
+
+yaml/
+
+diagrams/
+
+images/
+
+cleanup/
+
+=====================================================
+For EVERY folder generate
+
+README.md
+
+Step by Step Guide
+
+Commands
+
+Expected Output
+
+Interview Questions
+
+Troubleshooting
+
+Best Practices
+
+=====================================================
+Generate ALL YAML Files
+
+Role
+
+RoleBinding
+
+ClusterRole
+
+ClusterRoleBinding
+
+ServiceAccount
+
+Deployment
+
+Namespace
+
+ConfigMap
+
+Secret
+
+ResourceQuota
+
+LimitRange
+
+NetworkPolicy
+
+Pod
+
+Job
+
+CronJob
+
+DaemonSet
+
+StatefulSet
+
+=====================================================
+Generate ALL Shell Scripts
+
+setup.sh
+
+create-user.sh
+
+generate-certificates.sh
+
+configure-kubeconfig.sh
+
+switch-context.sh
+
+verify.sh
+
+cleanup.sh
+
+backup.sh
+
+restore.sh
+
+test-role.sh
+
+test-rolebinding.sh
+
+test-clusterrole.sh
+
+test-clusterrolebinding.sh
+
+test-serviceaccount.sh
+
+impersonation.sh
+
+=====================================================
+Authentication
+
+Explain
+
+Client Certificates
+
+CSR
+
+OIDC
+
+AWS IAM
+
+Azure AD
+
+Google Identity
+
+Service Account Tokens
+
+kubectl config
+
+Contexts
+
+Users
+
+Groups
+
+=====================================================
+Create REAL Kubernetes User
+
+Generate complete certificate-based authentication.
+
+Generate
+
+openssl commands
+
+CSR
+
+Certificate
+
+Sign certificate
+
+kubectl config set-credentials
+
+kubectl config set-context
+
+kubectl config use-context
+
+Switch to the user
+
+Verify access
+
+Do NOT use only "--as".
+
+Teach the real production method.
+
+=====================================================
+Generate Real Production Scenarios
+
+At least 40 scenarios.
+
+Examples
+
+Developer
+
+QA
+
+DevOps
+
+Production Support
+
+Security Team
+
+Platform Team
+
+Database Team
+
+Monitoring Team
+
+Logging Team
+
+GitHub Actions
+
+Jenkins
+
+ArgoCD
+
+Helm
+
+Multi Tenant
+
+Production Namespace
+
+Temporary Admin
+
+Namespace Isolation
+
+Read Only Production
+
+Secret Access
+
+Pod Logs
+
+Scaling
+
+Rolling Update
+
+Rollback
+
+Disaster Recovery
+
+Backup Team
+
+Auditors
+
+Compliance
+
+SOC Team
+
+PCI
+
+HIPAA
+
+Banking
+
+Healthcare
+
+E-Commerce
+
+SaaS
+
+Enterprise RBAC
+
+=====================================================
+Generate Interview Questions
+
+Minimum 300 questions.
+
+Include
+
+Beginner
+
+Intermediate
+
+Advanced
+
+Scenario Based
+
+MCQ
+
+Hands-on
+
+Debugging
+
+Production
+
+Architecture
+
+Security
+
+=====================================================
+Generate Troubleshooting
+
+Forbidden Errors
+
+Unauthorized
+
+Certificate Expired
+
+Invalid Token
+
+Missing ClusterRole
+
+Wrong Namespace
+
+Wrong Context
+
+Service Account Issues
+
+Token Issues
+
+OIDC Issues
+
+AWS IAM Issues
+
+Azure Issues
+
+GKE Issues
+
+kubectl auth can-i failures
+
+RBAC cache
+
+=====================================================
+Generate Mermaid Diagrams
+
+Authentication Flow
+
+Authorization Flow
+
+RBAC Flow
+
+RoleBinding Flow
+
+ClusterRole Flow
+
+Namespace Isolation
+
+CI/CD Flow
+
+GitHub Actions
+
+Jenkins
+
+EKS
+
+AKS
+
+GKE
+
+=====================================================
+Generate Practice Labs
+
+Minimum 50 labs.
+
+Each lab should include
+
+Objective
+
+Architecture
+
+Steps
+
+Commands
+
+Verification
+
+Cleanup
+
+Challenge
+
+Solution
+
+=====================================================
+Generate Interview Case Studies
+
+Google
+
+Amazon
+
+Microsoft
+
+Flipkart
+
+Zoho
+
+Freshworks
+
+Swiggy
+
+Zomato
+
+Netflix
+
+Uber
+
+PayPal
+
+Cisco
+
+VMware
+
+RedHat
+
+IBM
+
+=====================================================
+Formatting
+
+Everything must be Markdown.
+
+Every command must be inside markdown code blocks.
+
+Every YAML inside yaml code blocks.
+
+Every shell script inside bash code blocks.
+
+Every folder should have its own README.
+
+=====================================================
+Output
+
+Generate the repository folder by folder.
+
+Create actual file contents.
+
+Do NOT skip any file.
+
+Do NOT summarize.
+
+Generate production-quality training material suitable for DevOps Engineers with 2–8 years of experience and students preparing for Kubernetes interviews in 2026.

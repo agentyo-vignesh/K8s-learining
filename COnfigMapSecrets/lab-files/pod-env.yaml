@@ -1,0 +1,36 @@
+# This pod shows two ways to pull ConfigMap values in as environment variables.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: env-demo-1
+  namespace: cm-lab
+spec:
+  containers:
+    - name: demo
+      image: busybox:1.36
+      # on startup: print all env vars, then stay alive so we can exec/logs into it
+      command: ["sh", "-c", "env | sort && sleep 3600"]
+
+      # Option 1: pick ONE specific key from a ConfigMap -> one env var
+      env:
+        - name: APP_COLOR                # env var name inside the container
+          valueFrom:
+            configMapKeyRef:
+              name: web-config          # <- ConfigMap "app-config" must already exist
+              key: MY_NAME_IS             # <- the key to read from it
+
+      # Option 2: pull ALL keys from a ConfigMap -> one env var per key.
+      # envFrom is a LIST, so all ConfigMaps go as items under ONE envFrom key.
+      # (Duplicate "envFrom:" keys would NOT merge — the last one would win and
+      #  the others would be silently dropped.)
+      envFrom:
+        - configMapRef:
+            name: web-config
+        - configMapRef:
+            name: app-config
+        - configMapRef:
+            name: file-config           # <- from configmap.yaml (WELCOME_MESSAGE, MAX_CONNECTIONS, ...)
+
+# NOTE: "app-config" is NOT in this file — create it first with:
+#   kubectl create configmap app-config --from-literal=APP_COLOR=blue --from-literal=APP_MODE=production
+# If you skip that, the pod will fail with "configmap app-config not found".

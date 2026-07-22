@@ -1,0 +1,52 @@
+========================================================
+              RBAC LAB - RUN FLOW
+========================================================
+
+**STEP 0 : START CLUSTER**   (mandatory)
+   minikube start
+   minikube status
+
+--------------------------------------------------------
+
+**STEP 1 : BASE SETUP**   (namespace + real pods)
+   bash 00-setup.sh
+   kubectl apply -f deploy.yaml
+   kubectl get pods -n rbac-lab
+
+--------------------------------------------------------
+
+**STEP 2 : IMPERSONATION DEMO**   (--as, easy concept)
+   bash 01-auth-tests.sh
+   kubectl apply -f role-pod-reader.yaml
+   kubectl apply -f rolebinding-intern.yaml
+   bash 02-rolebinding-tests.sh
+   bash 03-serviceaccount.sh
+   bash 04-builtin-roles.sh
+
+--------------------------------------------------------
+
+**STEP 3 : REAL USER DEMO**   (main highlight)
+   bash create-user.sh
+   kubectl --context intern-ctx get pods -n rbac-lab
+   kubectl --context intern-ctx delete pod --all -n rbac-lab
+   kubectl config use-context minikube
+
+--------------------------------------------------------
+
+**STEP 4 : CLUSTER-WIDE DEMO**   (nodes access)
+   kubectl --context intern-ctx get nodes
+   kubectl apply -f clusterrole-node-reader.yaml
+   kubectl apply -f clusterrolebinding-intern.yaml
+   kubectl --context intern-ctx get nodes
+
+--------------------------------------------------------
+
+**STEP 5 : CLEANUP**
+   bash 99-cleanup.sh
+
+========================================================
+   SHORT PATH (real user demo mattum venumna):
+   minikube start
+   kubectl apply -f deploy.yaml
+   bash create-user.sh
+========================================================

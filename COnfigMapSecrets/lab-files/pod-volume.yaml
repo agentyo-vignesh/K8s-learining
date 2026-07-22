@@ -1,0 +1,23 @@
+# This pod shows a ConfigMap mounted as FILES instead of env vars.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: volume-demo
+  namespace: cm-lab
+spec:
+  containers:
+    - name: demo
+      image: busybox:1.36
+      # list the mounted files, print one of them, then stay alive
+      command: ["sh", "-c", "ls /etc/config && cat /etc/config/nginx.conf && sleep 3600"]
+      volumeMounts:
+        - name: config-volume        # must match a volume name below
+          mountPath: /etc/config     # where the files show up inside the container
+          readOnly: true             # good practice: config shouldn't be writable
+  volumes:
+    - name: config-volume
+      configMap:
+        name: web-config            # <- each key in this ConfigMap becomes one file here
+
+# TRY IT: kubectl exec volume-demo -- ls -l /etc/config
+#   -> you should see one file per ConfigMap key (WELCOME_MESSAGE, MAX_CONNECTIONS, nginx.conf)

@@ -1,0 +1,50 @@
+# Explore configmap.yaml and pod-env.yaml
+# Run these one at a time, not as a script.
+
+# ---- Setup ----
+kubectl create namespace cm-lab
+kubectl config set-context --current --namespace=cm-lab
+
+# ---- Apply the manifests ----
+kubectl apply -f configmap.yaml
+
+# pod-env.yaml also needs this configmap (for APP_COLOR) — create it first
+kubectl create configmap app-config \
+  --from-literal=APP_COLOR=blue \
+  --from-literal=APP_MODE=production
+
+kubectl apply -f pod-env.yaml
+
+# ---- Explore the ConfigMap ----
+kubectl get configmap web-config
+kubectl get configmap web-config -o yaml
+kubectl describe configmap web-config
+kubectl get configmap web-config -o jsonpath='{.data.WELCOME_MESSAGE}'; echo
+kubectl get configmap web-config -o jsonpath='{.data.MAX_CONNECTIONS}'; echo
+
+# ---- Explore the Pod ----
+kubectl get pod env-demo
+kubectl get pod env-demo -o wide
+kubectl get pod env-demo -o yaml
+kubectl describe pod env-demo
+
+# ---- Check the env vars actually landed in the container ----
+kubectl logs env-demo
+kubectl logs env-demo | grep -E 'APP_COLOR|WELCOME|MAX'
+kubectl exec env-demo -- env
+kubectl exec env-demo -- sh -c 'echo $APP_COLOR'
+kubectl exec env-demo -- sh -c 'echo $WELCOME_MESSAGE'
+kubectl exec env-demo -- sh -c 'echo $MAX_CONNECTIONS'
+
+# ---- Live shell into the pod (optional) ----
+kubectl exec -it env-demo -- sh
+
+# ---- Watch events / troubleshoot ----
+kubectl get events --sort-by=.lastTimestamp
+kubectl logs env-demo --previous   # only works after a restart
+
+# ---- Cleanup ----
+kubectl delete -f pod-env.yaml
+kubectl delete -f configmap.yaml
+kubectl config set-context --current --namespace=default
+kubectl delete namespace cm-lab

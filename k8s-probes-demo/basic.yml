@@ -1,0 +1,43 @@
+- name: Karthics playbook
+  hosts: all
+  become: true
+  vars:
+    deploy_env: devops
+  vars_files:
+    - ./pass.yml
+  tasks:
+    - name: print environment
+      debug:
+        msg: "this is my {{ deploy_env }}"
+
+    - name: print environment-1
+      debug:
+        msg: "this is my {{ name }} & password is {{ pass }}"
+        
+    - name: install nginx
+      apt:
+        name: "{{ item }}"
+        update_cache: yes 
+        state: present
+      loop:
+        - nginx
+        - curl
+        - telnet
+        - openjdk-25-crac-jre-headless          
+
+    - name: start nginx
+      service:
+        name: nginx
+        state: started
+        enabled: true
+
+    - name: deploy nginx path
+      copy:
+        src: ./index.html
+        dest: /var/www/html/index.html
+
+    - name: check storage
+      shell: df -h
+
+    - name: health check
+      shell: curl -I http://localhost

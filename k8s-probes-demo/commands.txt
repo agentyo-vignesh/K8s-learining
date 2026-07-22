@@ -1,0 +1,26 @@
+LIVENESS
+kubectl apply -f liveness.yaml
+kubectl get pods
+kubectl exec -it <pod-name> -- sh
+rm /tmp/healthy
+exit
+kubectl get pods -w
+
+READINESS
+kubectl apply -f readiness.yaml
+kubectl apply -f service.yaml
+kubectl get endpoints
+kubectl exec -it <pod-name> -- sh
+rm /tmp/ready
+exit
+kubectl get pods
+kubectl get endpoints
+kubectl exec -it <pod-name> -- sh
+touch /tmp/ready
+exit
+kubectl get endpoints
+
+STARTUP
+kubectl apply -f startup.yaml
+kubectl get pods -w
+kubectl describe pod <pod-name>

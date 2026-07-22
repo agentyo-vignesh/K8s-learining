@@ -1,0 +1,30 @@
+# ==========================================================================
+# hpa-basic.yaml — the simplest useful HPA
+# --------------------------------------------------------------------------
+# Scales the php-apache Deployment between 1 and 10 replicas, aiming to keep
+# average CPU utilization across all pods at 50% of the requested CPU (200m).
+# So the per-pod CPU target is 100m. When average CPU rises above 100m the
+# HPA adds pods; when it falls below, it removes them (after the default
+# 5-minute scale-down stabilization window).
+#
+# This is the declarative equivalent of:
+#   kubectl autoscale deployment php-apache --cpu-percent=50 --min=1 --max=10
+# ==========================================================================
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: php-apache
+spec:
+  scaleTargetRef:                 # WHAT to scale
+    apiVersion: apps/v1
+    kind: Deployment
+    name: php-apache
+  minReplicas: 1                  # Never go below this
+  maxReplicas: 10                 # Never go above this
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization       # Utilization = % of the pod's CPU *request*
+          averageUtilization: 50  # Keep the fleet average at 50% (=100m per pod)

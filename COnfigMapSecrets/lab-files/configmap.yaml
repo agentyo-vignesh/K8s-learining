@@ -1,0 +1,20 @@
+# A ConfigMap stores plain-text (non-secret) settings your app can use.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: web-config       # <- how other objects (pods) refer to this ConfigMap
+  namespace: cm-lab       # <- which namespace it lives in
+data:
+  # simple key: value pairs -> become individual env vars or files
+  WELCOME_MESSAGE: "Hello from Kubernees!"
+  MAX_CONNECTIONS: "100"
+  MY_NAME_IS: "Something Special"
+
+  # a multi-line value (like a whole config file) -> becomes one file
+  nginx.conf: |
+    server {
+      listen 80;
+      server_name localhost;
+    }
+
+# TRY IT: change WELCOME_MESSAGE above, then re-apply and check the pod again.

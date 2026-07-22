@@ -1,0 +1,56 @@
+# ==========================================================================
+# php-apache demo Deployment + Service
+# --------------------------------------------------------------------------
+# This is the classic HPA demo workload from the official Kubernetes docs.
+# The container image "registry.k8s.io/hpa-example" serves a tiny PHP page
+# that performs a CPU-heavy math loop on every request, so sending traffic
+# to it drives CPU usage up in a predictable way — perfect for autoscaling.
+#
+# KEY POINT: The HPA can ONLY calculate CPU/memory utilization when the
+# Pods declare resource *requests*. The percentage target in an HPA is
+# measured against the request, e.g. 50% of a 200m request = 100m.
+# No requests => HPA shows <unknown> and never scales.
+# ==========================================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: php-apache
+  labels:
+    app: php-apache
+spec:
+  replicas: 1                      # Start with 1 pod; the HPA takes over from here
+  selector:
+    matchLabels:
+      app: php-apache
+  template:
+    metadata:
+      labels:
+        app: php-apache
+    spec:
+      containers:
+        - name: php-apache
+          image: registry.k8s.io/hpa-example
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              cpu: 200m           # Baseline the HPA measures against (50% target => 100m)
+              memory: 128Mi       # Needed for the memory metric in hpa-advanced.yaml
+            limits:
+              cpu: 500m           # Hard ceiling; a busy pod can burst up to here
+              memory: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: php-apache
+  labels:
+    app: php-apache
+spec:
+  # ClusterIP (default): reachable inside the cluster at http://php-apache
+  # This is the DNS name the load-generator pod will hammer.
+  selector:
+    app: php-apache
+  ports:
+    - port: 80
+      targetPort: 80

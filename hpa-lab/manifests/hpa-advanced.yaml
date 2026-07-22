@@ -1,0 +1,63 @@
+# ==========================================================================
+# hpa-advanced.yaml — multi-metric HPA with custom scaling behavior
+# --------------------------------------------------------------------------
+# Everything on this file is commented line-by-line so students can read it
+# top to bottom and understand every field. This HPA:
+#   * scales on TWO metrics (CPU and memory) — the HPA uses whichever metric
+#     demands the MOST replicas (the "max wins" rule),
+#   * scales UP fast (react to load quickly),
+#   * scales DOWN slowly and conservatively (avoid flapping / thrashing).
+# ==========================================================================
+apiVersion: autoscaling/v2                 # v2 is required for multi-metric + behavior
+kind: HorizontalPodAutoscaler              # The object type
+metadata:
+  name: php-apache-advanced                # Name of this HPA object
+spec:
+  scaleTargetRef:                          # The workload this HPA controls
+    apiVersion: apps/v1                    #   API group/version of the target
+    kind: Deployment                       #   Target kind (Deployment/ReplicaSet/StatefulSet)
+    name: php-apache                       #   Target name (must exist in same namespace)
+  minReplicas: 1                           # Floor: never scale below 1 pod
+  maxReplicas: 10                          # Ceiling: never scale above 10 pods
+
+  metrics:                                 # LIST of metrics; HPA computes a desired
+                                           # replica count for EACH, then picks the highest.
+    - type: Resource                       # A built-in resource metric (from metrics-server)
+      resource:
+        name: cpu                          #   Metric #1: CPU
+        target:
+          type: Utilization                #   Measured as a % of the CPU *request* (200m)
+          averageUtilization: 50           #   Target 50% average => 100m per pod
+
+    - type: Resource                       # A second built-in resource metric
+      resource:
+        name: memory                       #   Metric #2: memory
+        target:
+          type: Utilization                #   Measured as a % of the memory *request* (128Mi)
+          averageUtilization: 70           #   Target 70% average => ~90Mi per pod
+
+  behavior:                                # Fine-tune HOW FAST scaling happens (v2 only)
+    scaleUp:                               # Rules that apply when adding pods
+      stabilizationWindowSeconds: 0        #   0 = react immediately to spikes (no look-back)
+      selectPolicy: Max                    #   If multiple policies apply, use the one that
+                                           #   allows the BIGGEST change (aggressive scale-up)
+      policies:                            #   Each policy caps how much change is allowed
+        - type: Percent                    #     Policy A: percentage-based growth
+          value: 100                       #       Allow doubling the pod count...
+          periodSeconds: 15                #       ...every 15 seconds
+        - type: Pods                       #     Policy B: absolute growth
+          value: 4                         #       Allow adding up to 4 pods...
+          periodSeconds: 15                #       ...every 15 seconds
+
+    scaleDown:                             # Rules that apply when removing pods
+      stabilizationWindowSeconds: 300      #   Look back over the last 300s (5 min) and use
+                                           #   the HIGHEST recommendation => prevents flapping
+      selectPolicy: Max                    #   Among scale-down policies, pick the largest
+                                           #   allowed step (still gated by the window above)
+      policies:
+        - type: Percent                    #     Remove at most...
+          value: 50                        #       50% of current pods...
+          periodSeconds: 60                #       ...per minute
+        - type: Pods                       #     ...or at most...
+          value: 2                         #       2 pods...
+          periodSeconds: 60                #       ...per minute (whichever Max policy allows)
