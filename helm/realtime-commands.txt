@@ -1,0 +1,63 @@
+# S0 - warm-up
+helm version
+helm repo add bitnami https://charts.bitnami.com/bitnami
+helm repo update
+helm search repo nginx
+helm show values bitnami/nginx | head -30
+helm install my-nginx bitnami/nginx
+helm list
+helm status my-nginx
+helm uninstall my-nginx
+
+# S1 - idempotent namespaced deploy
+helm upgrade --install web bitnami/nginx -n demo --create-namespace --wait --timeout 5m
+helm upgrade --install web bitnami/nginx -n demo --create-namespace --wait
+helm list -n demo
+
+# S2 - atomic auto-rollback on bad image
+helm upgrade --install web bitnami/nginx -n demo --set image.tag=this-tag-does-not-exist --atomic --wait --timeout 90s
+helm history web -n demo
+kubectl get pods -n demo
+
+# S3 - per-env values files
+cat > values-dev.yaml <<'EOF'
+replicaCount: 1
+service:
+  type: ClusterIP
+EOF
+cat > values-prod.yaml <<'EOF'
+replicaCount: 3
+service:
+  type: LoadBalancer
+EOF
+helm upgrade --install web bitnami/nginx -n demo -f values-dev.yaml --atomic --wait
+kubectl get svc,pods -n demo
+helm upgrade web bitnami/nginx -n demo -f values-prod.yaml --atomic --wait
+kubectl get svc,pods -n demo
+
+# S4 - debug + rollback
+helm status web -n demo
+helm get values web -n demo
+helm get manifest web -n demo | head -40
+helm history web -n demo
+helm rollback web 1 -n demo --wait
+helm history web -n demo
+
+# S5 - preview + own chart + cleanup
+helm template web bitnami/nginx -f values-prod.yaml | head -40
+helm upgrade web bitnami/nginx -n demo -f values-prod.yaml --dry-run --debug | tail -20
+helm upgrade --install app charts/myapp -n demo --atomic --wait
+helm upgrade --install app charts/webapp -n demo --atomic --wait
+helm uninstall web app -n demo
+kubectl delete ns demo
+
+
+helm history web -n demo                 # revisions paaru
+helm rollback web 0 -n demo --wait       # 0 = previous revision
+helm rollback web 1 -n demo --wait       # specific revision-ku
+
+
+helm package charts/myapp                # -> myapp-0.1.0.tgz
+helm package charts/webapp               # -> webapp-0.1.0.tgz
+helm package charts/myapp -d ./dist      # output folder
+helm package charts/myapp --version 1.0.0   # version override

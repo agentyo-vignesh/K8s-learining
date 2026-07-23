@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "webapp.fullname" . }}
+  labels:
+    {{- include "webapp.labels" . | nindent 4 }}
+  {{- with .Values.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.service.type }}
+  selector:
+    {{- include "webapp.selectorLabels" . | nindent 4 }}   # must match the pod labels
+  ports:
+    - name: http
+      port: {{ .Values.service.port }}          # the Service/ELB port (80)
+      targetPort: http                          # -> the container's named "http" port (8080)
+      protocol: TCP

@@ -1,0 +1,121 @@
+==========================================
+Why Do We Need Helm?
+==========================================
+
+Imagine you joined a company as a DevOps Engineer.
+
+The company has 4 projects.
+
+Project 1 - HRMS
+Project 2 - E-Commerce
+Project 3 - Banking Portal
+Project 4 - CRM
+
+Each project has around 30 features (microservices).
+
+Examples:
+
+HRMS
+------
+Employee Service
+Payroll Service
+Attendance Service
+Leave Service
+Notification Service
+...
+
+E-Commerce
+------------
+Product Service
+Order Service
+Payment Service
+Cart Service
+Inventory Service
+...
+
+Each feature needs Kubernetes resources like:
+
+• Deployment
+• Service
+• ConfigMap
+• Secret
+• Ingress
+• HPA
+
+That means one feature requires around 6 YAML files.
+
+Now calculate:
+
+4 Projects
+
+×
+
+30 Features
+
+=
+
+120 Features (Microservices)
+
+Each feature needs 6 YAML files.
+
+120 × 6
+
+=
+
+720 YAML files
+
+Now imagine the company has three environments.
+
+Development
+QA
+Production
+
+720 × 3
+
+=
+
+2160 YAML files
+
+Now think...
+
+• If the image version changes?
+• If the replica count changes?
+• If a new environment is added?
+• If a ConfigMap changes?
+• If we need to roll back?
+
+Will you edit thousands of YAML files manually?
+
+No.
+
+That is exactly why Helm was introduced.
+
+==========================================
+Solution
+==========================================
+
+Instead of maintaining thousands of YAML files,
+
+we create one reusable Helm Chart for each service.
+
+Then we use different values files for each environment.
+
+values-dev.yaml
+
+values-qa.yaml
+
+values-prod.yaml
+
+The templates remain the same.
+
+Only the configuration changes.
+
+Deployment becomes as simple as:
+
+helm install employee ./employee-chart -f values-dev.yaml
+
+helm install employee ./employee-chart -f values-qa.yaml
+
+helm install employee ./employee-chart -f values-prod.yaml
+
+This saves time, reduces errors, and standardizes deployments across all environments.

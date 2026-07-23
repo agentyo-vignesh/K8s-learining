@@ -1,0 +1,307 @@
+===========================================
+PROMETHEUS + GRAFANA INSTALLATION USING HELM
+===========================================
+
+Step 1: Verify Kubernetes Cluster
+---------------------------------
+
+kubectl get nodes
+
+Verify:
+-------
+- All nodes should be in Ready state.
+
+
+===========================================
+Step 2: Add Prometheus Helm Repository
+===========================================
+
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+
+Verify:
+
+helm repo list
+
+Expected Output:
+
+NAME                    URL
+bitnami                 https://charts.bitnami.com/bitnami
+prometheus-community    https://prometheus-community.github.io/helm-charts
+
+
+===========================================
+Step 3: Update Helm Repository
+===========================================
+
+helm repo update
+
+
+===========================================
+Step 4: Search Available Chart
+===========================================
+
+helm search repo kube-prometheus-stack
+
+Expected Output:
+
+prometheus-community/kube-prometheus-stack
+
+
+===========================================
+Step 5: Create Namespace
+===========================================
+
+kubectl create namespace monitoring
+
+
+Verify:
+
+kubectl get ns
+
+
+===========================================
+Step 6: Install Prometheus + Grafana
+===========================================
+
+helm install monitoring prometheus-community/kube-prometheus-stack \
+--namespace monitoring
+
+
+Explanation
+-----------
+
+monitoring                     -> Release Name
+
+prometheus-community           -> Repository Name
+
+kube-prometheus-stack          -> Chart Name
+
+
+===========================================
+Step 7: Verify Helm Release
+===========================================
+
+helm list -A
+
+OR
+
+helm list -n monitoring
+
+
+Expected Output
+
+NAME          NAMESPACE     STATUS
+monitoring    monitoring    deployed
+
+
+===========================================
+Step 8: Verify Pods
+===========================================
+
+kubectl get pods -n monitoring
+
+Wait until all pods are Running.
+
+Expected Pods
+
+alertmanager-monitoring-kube-prometheus-alertmanager-0
+
+monitoring-grafana
+
+monitoring-kube-prometheus-operator
+
+monitoring-kube-state-metrics
+
+monitoring-prometheus-node-exporter
+
+prometheus-monitoring-kube-prometheus-prometheus
+
+
+===========================================
+Step 9: Verify Services
+===========================================
+
+kubectl get svc -n monitoring
+
+Expected Services
+
+alertmanager-operated
+
+monitoring-grafana
+
+monitoring-kube-prometheus-alertmanager
+
+monitoring-kube-prometheus-operator
+
+monitoring-kube-prometheus-prometheus
+
+monitoring-kube-state-metrics
+
+monitoring-prometheus-node-exporter
+
+prometheus-operated
+
+
+===========================================
+Step 10: Get Grafana Admin Password
+===========================================
+
+kubectl get secret monitoring-grafana \
+-n monitoring \
+-o jsonpath="{.data.admin-password}" | base64 -d
+
+
+Username
+
+admin
+
+Password
+
+(Output of above command)
+
+
+===========================================
+Step 11: Change Grafana Service to LoadBalancer
+===========================================
+
+kubectl patch svc monitoring-grafana \
+-n monitoring \
+-p '{"spec":{"type":"LoadBalancer"}}'
+
+
+===========================================
+Step 12: Verify LoadBalancer
+===========================================
+
+kubectl get svc -n monitoring
+
+
+Wait until EXTERNAL-IP is assigned.
+
+Example
+
+NAME                  TYPE           CLUSTER-IP      EXTERNAL-IP
+monitoring-grafana    LoadBalancer   100.xx.xx.xx    a1b2c3d4.us-east-1.elb.amazonaws.com
+
+
+===========================================
+Step 13: Access Grafana
+===========================================
+
+Open Browser
+
+http://<EXTERNAL-IP>
+
+
+Example
+
+http://a1b2c3d4.us-east-1.elb.amazonaws.com
+
+
+Login
+
+Username : admin
+
+Password : (Password generated in Step 10)
+
+
+===========================================
+Step 14: Change Prometheus Service to LoadBalancer
+===========================================
+
+kubectl patch svc monitoring-kube-prometheus-prometheus \
+-n monitoring \
+-p '{"spec":{"type":"LoadBalancer"}}'
+
+
+===========================================
+Step 15: Verify Prometheus LoadBalancer
+===========================================
+
+kubectl get svc -n monitoring
+
+Wait until EXTERNAL-IP is assigned.
+
+
+===========================================
+Step 16: Access Prometheus
+===========================================
+
+Open Browser
+
+http://<PROMETHEUS-EXTERNAL-IP>:9090
+
+
+===========================================
+Useful Verification Commands
+===========================================
+
+Check Helm Releases
+
+helm list -A
+
+
+Check Pods
+
+kubectl get pods -n monitoring
+
+
+Watch Pods
+
+kubectl get pods -n monitoring -w
+
+
+Check Services
+
+kubectl get svc -n monitoring
+
+
+Describe Grafana Service
+
+kubectl describe svc monitoring-grafana -n monitoring
+
+
+Describe Prometheus Service
+
+kubectl describe svc monitoring-kube-prometheus-prometheus -n monitoring
+
+
+Check Events
+
+kubectl get events -n monitoring
+
+
+===========================================
+Cleanup (Optional)
+===========================================
+
+Delete Helm Release
+
+helm uninstall monitoring -n monitoring
+
+
+Delete Namespace
+
+kubectl delete ns monitoring
+
+
+===========================================
+Architecture
+===========================================
+
+                Helm
+                  |
+                  |
+      kube-prometheus-stack
+                  |
+    --------------------------------
+    |              |              |
+ Prometheus     Grafana      Alertmanager
+    |
+    |
+-----------------------------
+|                           |
+Node Exporter      kube-state-metrics
+|
+|
+Collects Kubernetes & Node Metrics

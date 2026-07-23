@@ -1,0 +1,13 @@
+apiVersion: v2
+name: webapp
+description: A production-grade Helm chart — non-root pods, health probes, resource limits, optional HPA & Ingress
+type: application
+# CHART version — bump on EVERY chart change (SemVer). Different from appVersion.
+version: 0.1.0
+# appVersion — the version of the app packaged inside (informational, shown in `helm list`).
+appVersion: "1.27"
+keywords:
+  - nginx
+  - webapp
+maintainers:
+  - name: platform-team

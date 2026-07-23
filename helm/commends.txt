@@ -1,0 +1,12 @@
+1. helm version
+2. helm repo add bitnami https://charts.bitnami.com/bitnami
+3. helm repo update
+4. helm search repo nginx
+5. helm show values bitnami/nginx
+6. helm install my-nginx bitnami/nginx
+7. helm list
+8. helm status my-nginx
+9. helm upgrade my-nginx bitnami/nginx
+10. helm history my-nginx
+11. helm rollback my-nginx 1
+12. helm uninstall my-nginx

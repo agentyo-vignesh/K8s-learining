@@ -56,20 +56,37 @@ helm/
 │   ├── 02-lab-guide.md          ← Phase 1 walkthrough: install bitnami/nginx (every cmd + output)
 │   ├── 03-create-chart.md       ← build your own chart: helm create + hand-written templates
 │   ├── 04-troubleshooting.md    ← symptom → cause → fix table + deep dives + Windows notes
-│   └── 05-cheatsheet.md         ← one-page command reference + 14 interview Q&A
+│   ├── 05-cheatsheet.md         ← one-page command reference + 14 interview Q&A
+│   ├── 06-production-chart.md   ← prod-grade chart walkthrough + interview soundbites
+│   └── 07-realtime-scenarios.md ← 1-hour real-world runbook (idempotent/atomic/per-env deploys)
 ├── charts/
-│   └── myapp/                   ← a hand-written custom chart
-│       ├── Chart.yaml           ← metadata
-│       ├── values.yaml          ← default values
+│   ├── myapp/                   ← minimal hand-written chart (learn the basics)
+│   │   ├── Chart.yaml           ← metadata
+│   │   ├── values.yaml          ← default values
+│   │   ├── .helmignore
+│   │   └── templates/
+│   │       ├── deployment.yaml  ← our own template
+│   │       ├── service.yaml     ← our own template (LoadBalancer + annotations)
+│   │       └── NOTES.txt        ← post-install message
+│   └── webapp/                  ← PRODUCTION-GRADE chart (interview-ready)
+│       ├── Chart.yaml
+│       ├── values.yaml          ← fully-commented prod knobs
 │       ├── .helmignore
 │       └── templates/
-│           ├── deployment.yaml  ← our own template
-│           ├── service.yaml     ← our own template
-│           └── NOTES.txt        ← post-install message
+│           ├── _helpers.tpl     ← reusable name/label snippets
+│           ├── deployment.yaml  ← non-root, probes, resources, HPA-aware
+│           ├── service.yaml
+│           ├── serviceaccount.yaml  ← gated (IRSA-ready)
+│           ├── hpa.yaml         ← gated by autoscaling.enabled
+│           ├── ingress.yaml     ← gated by ingress.enabled
+│           ├── NOTES.txt
+│           └── tests/
+│               └── test-connection.yaml  ← helm test smoke test
 ├── scripts/
 │   ├── install-helm.sh          ← install Helm 3 (idempotent)
 │   ├── deploy-bitnami.sh        ← Phase 1 fast path
-│   ├── deploy-mychart.sh        ← install the custom chart (lint → render → dry-run → install)
+│   ├── deploy-mychart.sh        ← install the minimal chart (lint → render → dry-run → install)
+│   ├── deploy-webapp.sh         ← install the prod-grade chart + run helm test
 │   ├── watch.sh                 ← live view of the demo namespace
 │   └── cleanup.sh               ← remove all releases + namespace
 └── student-worksheet.md         ← fill-in-the-blanks + predictions + 6 tasks + answer key
@@ -83,10 +100,11 @@ helm/
 |---|---|---|---|
 | 1 | Read the theory | 10 min | [`docs/01-concepts.md`](docs/01-concepts.md) |
 | 2 | Phase 1: install a public chart | 20 min | [`docs/02-lab-guide.md`](docs/02-lab-guide.md) |
-| 3 | Phase 2: build your own chart | 20 min | [`docs/03-create-chart.md`](docs/03-create-chart.md) |
-| 4 | Break something / debug | 5 min | [`docs/04-troubleshooting.md`](docs/04-troubleshooting.md) |
-| 5 | Test yourself | 10 min | [`student-worksheet.md`](student-worksheet.md) |
-| 6 | Keep for reference | — | [`docs/05-cheatsheet.md`](docs/05-cheatsheet.md) |
+| 3 | Phase 2: build your own (minimal) chart | 20 min | [`docs/03-create-chart.md`](docs/03-create-chart.md) |
+| 4 | Phase 3: production-grade chart + interview prep | 20 min | [`docs/06-production-chart.md`](docs/06-production-chart.md) |
+| 5 | Break something / debug | 5 min | [`docs/04-troubleshooting.md`](docs/04-troubleshooting.md) |
+| 6 | Test yourself | 10 min | [`student-worksheet.md`](student-worksheet.md) |
+| 7 | Keep for reference | — | [`docs/05-cheatsheet.md`](docs/05-cheatsheet.md) |
 
 ---
 
@@ -104,13 +122,16 @@ chmod +x scripts/*.sh
 # 2) PHASE 1 — install/upgrade/rollback the public bitnami/nginx chart
 ./scripts/deploy-bitnami.sh
 
-# 3) PHASE 2 — install YOUR OWN chart (charts/myapp)
+# 3) PHASE 2 — install YOUR OWN minimal chart (charts/myapp)
 ./scripts/deploy-mychart.sh
 
-# 4) Watch things live (optional, separate terminal)
+# 4) PHASE 3 — install the PRODUCTION-GRADE chart + run its helm test (charts/webapp)
+./scripts/deploy-webapp.sh
+
+# 5) Watch things live (optional, separate terminal)
 ./scripts/watch.sh
 
-# 5) Tear everything down when finished
+# 6) Tear everything down when finished
 ./scripts/cleanup.sh
 ```
 

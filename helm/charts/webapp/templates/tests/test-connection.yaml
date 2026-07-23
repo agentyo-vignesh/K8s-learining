@@ -1,0 +1,19 @@
+{{/*
+A Helm test hook. `helm test <release>` runs this pod; exit 0 = pass.
+Great interview point: charts can ship their own smoke tests.
+*/}}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "webapp.fullname" . }}-test-connection"
+  labels:
+    {{- include "webapp.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  restartPolicy: Never
+  containers:
+    - name: wget
+      image: busybox:1.36
+      command: ["wget"]
+      args: ["{{ include "webapp.fullname" . }}:{{ .Values.service.port }}"]

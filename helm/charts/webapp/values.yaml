@@ -1,0 +1,95 @@
+# =========================================================================
+# webapp — default values (production-grade)
+# Every setting here is a DEFAULT. Override with --set or -f myvalues.yaml.
+# =========================================================================
+
+# Number of pod replicas. IGNORED when autoscaling.enabled=true (the HPA owns it then).
+replicaCount: 2
+
+image:
+  # nginx-unprivileged listens on 8080 and runs as a non-root user (uid 101).
+  repository: nginxinc/nginx-unprivileged
+  tag: "1.27"                 # pin a version — NEVER use "latest" in prod
+  pullPolicy: IfNotPresent
+
+# Private registry pull secrets, e.g. [{ name: my-regcred }]
+imagePullSecrets: []
+
+# Override the generated resource names if needed.
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true                # make a dedicated SA (least-privilege best practice)
+  name: ""                    # "" -> use the generated fullname
+  annotations: {}             # e.g. AWS IRSA role ARN goes here
+
+# Extra annotations on the POD (e.g. Prometheus scrape hints).
+podAnnotations: {}
+
+# Pod-level security context.
+podSecurityContext:
+  fsGroup: 101
+
+# Container-level security context — hardened for prod.
+securityContext:
+  runAsNonRoot: true          # refuse to run as root
+  runAsUser: 101              # nginx-unprivileged user
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false   # nginx needs to write /tmp,/var/cache; set true only with emptyDir mounts
+  capabilities:
+    drop:
+      - ALL                   # drop every Linux capability
+
+service:
+  type: LoadBalancer          # provisions an AWS ELB on kOps
+  port: 80                    # port the Service (and ELB) listens on
+  targetPort: 8080            # container port nginx-unprivileged serves on
+  annotations: {}
+    # service.beta.kubernetes.io/aws-load-balancer-type: nlb
+    # service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
+
+ingress:
+  enabled: false              # off by default; turn on with --set ingress.enabled=true
+  className: ""               # e.g. "nginx" or "alb"
+  annotations: {}
+  hosts:
+    - host: webapp.example.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []                     # e.g. [{ secretName: webapp-tls, hosts: [webapp.example.local] }]
+
+# Resource requests/limits. REQUESTS ARE REQUIRED for the HPA to compute % CPU.
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 250m
+    memory: 256Mi
+
+# Liveness = "restart me if I'm dead". Readiness = "route traffic only when ready".
+livenessProbe:
+  httpGet:
+    path: /
+    port: http
+  initialDelaySeconds: 10
+  periodSeconds: 15
+readinessProbe:
+  httpGet:
+    path: /
+    port: http
+  initialDelaySeconds: 5
+  periodSeconds: 10
+
+autoscaling:
+  enabled: false              # when true, replicaCount is ignored and an HPA is created
+  minReplicas: 2
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 70
+
+# Scheduling controls (all optional).
+nodeSelector: {}
+tolerations: []
+affinity: {}

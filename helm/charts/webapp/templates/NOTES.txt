@@ -1,0 +1,26 @@
+✅  {{ include "webapp.fullname" . }}  ({{ .Chart.Name }}-{{ .Chart.Version }}, app {{ .Chart.AppVersion }})
+    deployed as release "{{ .Release.Name }}" in namespace "{{ .Release.Namespace }}".
+
+{{ if .Values.autoscaling.enabled -}}
+Autoscaling: ON  ({{ .Values.autoscaling.minReplicas }}-{{ .Values.autoscaling.maxReplicas }} pods @ {{ .Values.autoscaling.targetCPUUtilizationPercentage }}% CPU)
+{{- else -}}
+Replicas: {{ .Values.replicaCount }}
+{{- end }}
+Image:   {{ .Values.image.repository }}:{{ .Values.image.tag }}  (runs as non-root uid {{ .Values.securityContext.runAsUser }})
+
+Reach the app:
+{{- if .Values.ingress.enabled }}
+{{- range .Values.ingress.hosts }}
+  http://{{ .host }}
+{{- end }}
+{{- else if eq .Values.service.type "LoadBalancer" }}
+  # AWS ELB takes ~2-3 min to resolve:
+  echo "http://$(kubectl get svc {{ include "webapp.fullname" . }} -n {{ .Release.Namespace }} -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')"
+{{- else }}
+  kubectl port-forward -n {{ .Release.Namespace }} svc/{{ include "webapp.fullname" . }} 8080:{{ .Values.service.port }}
+  # then open http://localhost:8080
+{{- end }}
+
+Verify the release:
+  helm status {{ .Release.Name }} -n {{ .Release.Namespace }}
+  helm test   {{ .Release.Name }} -n {{ .Release.Namespace }}
