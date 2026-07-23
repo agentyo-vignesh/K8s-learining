@@ -1,0 +1,13 @@
+# Patterns to ignore when building packages.
+# Same syntax as .gitignore. Match is against the relative path.
+.DS_Store
+.git/
+.gitignore
+*.swp
+*.bak
+*.tmp
+*.orig
+*~
+.project
+.idea/
+.vscode/

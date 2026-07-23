@@ -1,0 +1,15 @@
+replicaCount: 2
+
+image:
+  repository: nginx
+  tag: "1.27"
+  pullPolicy: IfNotPresent
+
+service:
+  type: LoadBalancer          # provisions an AWS ELB on kOps
+  port: 80
+  # Optional AWS load balancer annotations. Leave {} for a classic ELB,
+  # or uncomment to control the type/scheme.
+  annotations: {}
+    # service.beta.kubernetes.io/aws-load-balancer-type: nlb            # network LB instead of classic
+    # service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing  # or "internal"
